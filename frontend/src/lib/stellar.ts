@@ -1,4 +1,15 @@
-import { Horizon, Networks, rpc as StellarRpc } from "@stellar/stellar-sdk";
+import {
+  Horizon,
+  Networks,
+  rpc as StellarRpc,
+  TransactionBuilder,
+  BASE_FEE,
+  Asset,
+  Transaction,
+  Operation,
+  Memo,
+} from "@stellar/stellar-sdk";
+import { signTransaction } from "@stellar/freighter-api";
 
 export const NETWORK = "testnet";
 
@@ -29,6 +40,41 @@ export async function getAccountInfo(address: string) {
     }
     throw err;
   }
+}
+
+export async function sendPaymentFromWallet(
+  sourceAddress: string,
+  destinationAddress: string,
+  amount: string,
+  memo?: string,
+): Promise<string> {
+  const sourceAccount = await horizon.loadAccount(sourceAddress);
+  const paymentTx = new TransactionBuilder(sourceAccount, {
+    fee: BASE_FEE,
+    networkPassphrase: Networks.TESTNET,
+  })
+    .addOperation(
+      Operation.payment({
+        destination: destinationAddress,
+        asset: Asset.native(),
+        amount: Number(amount).toFixed(7),
+      }),
+    )
+    .addMemo(memo ? Memo.text(memo.slice(0, 28)) : Memo.none())
+    .setTimeout(30)
+    .build();
+
+  const { signedTxXdr, error } = await signTransaction(paymentTx.toXDR(), {
+    networkPassphrase: Networks.TESTNET,
+  });
+
+  if (error) {
+    throw new Error(error);
+  }
+
+  const signed = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET) as Transaction;
+  const result = await horizon.submitTransaction(signed);
+  return result.hash;
 }
 
 export function shortAddress(address: string): string {

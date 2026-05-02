@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  isConnected,
-  isAllowed,
-  setAllowed,
   getAddress,
   getNetwork,
+  isAllowed,
+  isConnected,
+  setAllowed,
 } from "@stellar/freighter-api";
 
 export type WalletStatus = "idle" | "connecting" | "connected" | "error";
@@ -31,74 +31,76 @@ export function useFreighter() {
   }, []);
 
   const checkInstalled = async () => {
-    const connResult = await isConnected();
-    if (!connResult.isConnected) {
-      setState((s) => ({ ...s, isInstalled: false }));
+    const connection = await isConnected();
+    if (!connection.isConnected) {
+      setState((current) => ({ ...current, isInstalled: false }));
       return;
     }
 
-    setState((s) => ({ ...s, isInstalled: true }));
+    setState((current) => ({ ...current, isInstalled: true }));
 
-    const allowedResult = await isAllowed();
-    if (allowedResult.isAllowed) {
-      try {
-        const addrResult = await getAddress();
-        const netResult = await getNetwork();
-        if (!addrResult.error && !netResult.error) {
-          setState({
-            status: "connected",
-            address: addrResult.address,
-            network: netResult.network,
-            error: null,
-            isInstalled: true,
-          });
-        }
-      } catch {
-        // Not connected yet
+    const allowed = await isAllowed();
+    if (!allowed.isAllowed) return;
+
+    try {
+      const address = await getAddress();
+      const network = await getNetwork();
+      if (!address.error && !network.error) {
+        setState({
+          status: "connected",
+          address: address.address,
+          network: network.network,
+          error: null,
+          isInstalled: true,
+        });
       }
+    } catch {
+      setState((current) => ({ ...current, status: "idle" }));
     }
   };
 
-  const connect = useCallback(async () => {
-    setState((s) => ({ ...s, status: "connecting", error: null }));
+  const connect = useCallback(async (): Promise<string | null> => {
+    setState((current) => ({ ...current, status: "connecting", error: null }));
 
     try {
-      const connResult = await isConnected();
-      if (!connResult.isConnected) {
-        setState((s) => ({
-          ...s,
+      const connection = await isConnected();
+      if (!connection.isConnected) {
+        setState((current) => ({
+          ...current,
           status: "error",
-          error: "Freighter yüklü değil. Tarayıcı eklentisini kurun.",
+          error: "Freighter yüklü değil. Tarayıcı eklentisini kurup sayfayı yenile.",
           isInstalled: false,
         }));
-        return;
+        return null;
       }
 
       await setAllowed();
-      const addrResult = await getAddress();
-      const netResult = await getNetwork();
+      const address = await getAddress();
+      const network = await getNetwork();
 
-      if (addrResult.error) {
-        throw new Error("Adres alınamadı");
-      }
+      if (address.error) throw new Error("Freighter adresi alınamadı.");
+      if (network.error) throw new Error("Freighter ağ bilgisi alınamadı.");
 
       setState({
         status: "connected",
-        address: addrResult.address,
-        network: netResult.network,
+        address: address.address,
+        network: network.network,
         error: null,
         isInstalled: true,
       });
+
+      return address.address;
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Bağlantı başarısız";
-      setState((s) => ({ ...s, status: "error", error: message }));
+        err instanceof Error ? err.message : "Freighter bağlantısı başarısız.";
+      setState((current) => ({ ...current, status: "error", error: message }));
+      return null;
     }
   }, []);
 
   const disconnect = useCallback(() => {
-    setState((s) => ({
-      ...s,
+    setState((current) => ({
+      ...current,
       status: "idle",
       address: null,
       network: null,

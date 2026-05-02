@@ -7,7 +7,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@stellar/stellar-sdk": "^13.0.0",
+    "@stellar/stellar-sdk": "^15.0.1",
     "cors": "^2.8.5",
     "express": "^4.19.2"
   }
