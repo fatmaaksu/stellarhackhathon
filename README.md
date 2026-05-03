@@ -1,85 +1,114 @@
 # KidQuest Wallet
 
-KidQuest Wallet, ebeveynlerin çocuklarına görev verebildiği ve görev tamamlandığında harçlığı Stellar Testnet üzerinde akıllı kontrat aracılığıyla güvenli şekilde gönderebildiği bir aile harçlığı uygulamasıdır.
+KidQuest Wallet is a Stellar Testnet family allowance app where parents assign tasks to children and lock the reward in a Soroban smart contract. When the child marks the task as completed, the parent approves it with Freighter and the locked XLM reward is released to the child wallet.
 
-Uygulamada ebeveyn Freighter cüzdanını bağlar, çocukların Stellar cüzdan adreslerini manuel olarak ekler, görev oluşturur ve ödülü akıllı kontratta kilitler. Çocuk görevi tamamladığını bildirdikten sonra ebeveyn onay verir; kontrat kilitli XLM ödülünü çocuğun cüzdanına gönderir.
+The goal of the project is to turn a simple family allowance flow into a transparent, blockchain-backed reward system. Instead of sending money manually after the task, the parent locks the reward when the task is created. This makes the reward visible, verifiable, and conditional.
 
-## Proje Özeti
-
-Geleneksel aile harçlığı modelinde ödeme tamamen ebeveynin sonradan para gönderme kararına bağlıdır. Bu projede ödül, görev oluşturulduğu anda akıllı kontratta kilitlenir. Böylece çocuk görevin ödülünün gerçekten ayrıldığını bilir, ebeveyn de ödeme koşulunu kontrollü şekilde yönetir.
-
-Temel akış:
-
-1. Ebeveyn Freighter ile Stellar Testnet cüzdanını bağlar.
-2. Ebeveyn çocuk adı ve çocuğun Stellar public wallet adresini ekler.
-3. Ebeveyn görev ve ödül miktarı belirler.
-4. Görev oluşturulurken ödül XLM, Soroban akıllı kontratında kilitlenir.
-5. Çocuk uygulamada görevi tamamladığını bildirir.
-6. Ebeveyn görevi onaylar.
-7. Akıllı kontrat kilitli ödülü çocuğun cüzdanına gönderir.
-
-## Özellikler
-
-- Ebeveyn ve çocuk için ayrı kullanım ekranları
-- Freighter ile ebeveyn cüzdan bağlantısı
-- Çocuk cüzdanını manuel Stellar adresiyle ekleme
-- Birden fazla çocuk arasında seçim yapabilme
-- Çocuğa görev verme ve ödül miktarı belirleme
-- Görev ödülünü Soroban akıllı kontratında kilitleme
-- Çocuk tarafından görev tamamlandı bildirimi
-- Ebeveyn onayıyla kontrattan çocuğa XLM ödeme
-- Stellar Testnet ve Friendbot desteği
-- İşlem hashlerini Stellar Expert üzerinde görüntüleme
-
-## Akıllı Kontrat Bilgileri
-
-Kontrat adı: `reward_escrow`
+## Live Blockchain Details
 
 Network: `Stellar Testnet`
 
-Contract ID:
+Reward Escrow Contract ID:
 
 ```text
 CBVY4GD3R6PRGG4WAFH5Y5WL3LJL2EI6VWYUYHSHNN6EOTQPPT7VQXIH
 ```
 
-Native XLM token contract:
+Native XLM Token Contract:
 
 ```text
 CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
 ```
 
-Deploy transaction:
+Example Transaction:
 
 ```text
-146992dd581528d00419818858f171d3c11f29aaad842257e0ac9d9cf60714cd
+f9bfa567104298c960df3d4b24bcafd64795a8d8baa8fb47e7f8ade7a830cddf
 ```
 
-Kontrat dosyaları:
+You can inspect Testnet transactions on Stellar Expert:
 
 ```text
-contracts/reward_escrow/
-├── Cargo.toml
-├── README.md
-└── src/lib.rs
+https://stellar.expert/explorer/testnet
 ```
 
-Kontrat fonksiyonları:
+## Problem
 
-| Fonksiyon | Açıklama |
+In a traditional allowance system, a child completes a task and then waits for the parent to manually send the reward. This flow depends on trust and has no transparent proof that the reward was actually set aside.
+
+KidQuest Wallet solves this by using a smart contract:
+
+- The parent creates a task.
+- The task reward is locked in the contract.
+- The child submits completion.
+- The parent approves the task.
+- The contract releases the locked XLM reward to the child wallet.
+
+## Key Features
+
+- Parent and child role selection
+- Parent wallet connection with Freighter
+- Manual child wallet registration by Stellar public key
+- Multiple child wallet support
+- Task creation with XLM reward amount
+- Reward locking through a Soroban smart contract
+- Child task completion flow
+- Parent approval and contract-based reward release
+- Stellar Testnet Friendbot support
+- Transaction links for Stellar Expert
+- Warm, kid-friendly orange and white dashboard UI
+
+## User Flow
+
+```text
+Parent connects Freighter
+        |
+        v
+Parent adds child wallet
+        |
+        v
+Parent creates task and reward
+        |
+        v
+Reward is locked in the smart contract
+        |
+        v
+Child marks task as completed
+        |
+        v
+Parent approves the task
+        |
+        v
+Smart contract sends reward to child wallet
+```
+
+## Smart Contract
+
+The smart contract is located in:
+
+```text
+contracts/reward_escrow/src/lib.rs
+```
+
+It is written in Rust with the Soroban SDK.
+
+### Contract Functions
+
+| Function | Description |
 |---|---|
-| `create_task` | Görev kaydını zincirde oluşturur. |
-| `fund_task` | Görev ödülünü kontrata kilitler. |
-| `create_and_fund_task` | Görevi oluşturur ve ödülü aynı işlemde kontrata kilitler. |
-| `approve_and_pay` | Ebeveyn onayı sonrası ödülü çocuğa gönderir. |
-| `refund` | Gerekirse kilitli ödülü ebeveyne geri döndürür. |
-| `get_task` | Zincirdeki görev bilgisini okur. |
+| `create_task` | Creates an on-chain task record. |
+| `fund_task` | Locks the task reward in the contract. |
+| `create_and_fund_task` | Creates the task and locks the reward in one transaction. |
+| `approve_and_pay` | Releases the locked reward to the child wallet after parent approval. |
+| `refund` | Sends the locked reward back to the parent if needed. |
+| `get_task` | Reads task data from contract storage. |
 
-## Teknoloji Stack
+## Tech Stack
 
-| Katman | Teknoloji |
+| Layer | Technology |
 |---|---|
 | Frontend | React, TypeScript, Vite |
+| Styling | CSS Modules |
 | Wallet | Freighter API |
 | Backend | Node.js, Express |
 | Blockchain SDK | Stellar JavaScript SDK |
@@ -87,32 +116,32 @@ Kontrat fonksiyonları:
 | Network | Stellar Testnet |
 | Explorer | Stellar Expert Testnet |
 
-## Mimari
+## Architecture
 
 ```text
-Kullanıcı
-   |
-   v
+User
+  |
+  v
 React Frontend
-   |
-   | Freighter imzası
-   v
+  |
+  | Freighter signature request
+  v
 Freighter Wallet
-   |
-   v
+  |
+  v
 Express Backend
-   |
-   | Horizon API / Soroban RPC
-   v
+  |
+  | Horizon API / Soroban RPC
+  v
 Stellar Testnet
-   |
-   v
+  |
+  v
 Reward Escrow Smart Contract
 ```
 
-Frontend kullanıcı arayüzünü ve Freighter imzalama akışını yönetir. Backend, görevleri ve çocuk bilgilerini in-memory olarak tutar, Stellar/Soroban transaction XDR verilerini hazırlar ve imzalanmış transactionları ağa gönderir. Akıllı kontrat ise ödül kilitleme ve ödeme kurallarını zincir üzerinde uygular.
+The frontend handles the parent and child screens. The backend prepares Stellar/Soroban transaction XDRs and submits signed transactions. Freighter signs transactions without exposing the parent private key. The smart contract enforces the reward locking and payment rules.
 
-## Proje Yapısı
+## Project Structure
 
 ```text
 .
@@ -121,124 +150,120 @@ Frontend kullanıcı arayüzünü ve Freighter imzalama akışını yönetir. Ba
 │   ├── package.json
 │   └── package-lock.json
 ├── frontend/
+│   ├── public/
+│   │   └── assets/
+│   │       ├── kidquest-family.png
+│   │       └── kidquest-children.png
 │   ├── src/
 │   │   ├── App.tsx
 │   │   ├── App.module.css
-│   │   ├── hooks/useFreighter.ts
-│   │   └── lib/stellar.ts
+│   │   ├── index.css
+│   │   ├── hooks/
+│   │   │   └── useFreighter.ts
+│   │   └── lib/
+│   │       └── stellar.ts
 │   ├── package.json
 │   └── vite.config.ts
 ├── contracts/
 │   ├── reward_escrow/
-│   │   ├── src/lib.rs
 │   │   ├── Cargo.toml
-│   │   └── README.md
+│   │   ├── README.md
+│   │   └── src/
+│   │       └── lib.rs
 │   └── counter/
+├── .gitignore
 └── README.md
 ```
 
-## Kurulum
+## Setup
 
-Gereksinimler:
+Requirements:
 
-- Node.js 20 veya üzeri
+- Node.js 20+
 - npm
-- Freighter Wallet tarayıcı eklentisi
 - Rust
 - Stellar CLI
+- Freighter browser extension
 
-Backend bağımlılıkları:
+Install backend dependencies:
 
 ```bash
 cd backend
 npm install
 ```
 
-Frontend bağımlılıkları:
+Install frontend dependencies:
 
 ```bash
 cd frontend
 npm install
 ```
 
-## Çalıştırma
+## Run Locally
 
-Backend:
+Start the backend:
 
 ```bash
 cd backend
 npm run dev
 ```
 
-Backend varsayılan olarak şu adreste çalışır:
+Backend URL:
 
 ```text
 http://localhost:4000
 ```
 
-Frontend:
+Start the frontend:
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Frontend Vite tarafından verilen adreste açılır. Bu projede geliştirme sırasında kullanılan adres:
+Frontend URL:
 
 ```text
 http://127.0.0.1:3000
 ```
 
-Sağlık kontrolü:
+Health check:
 
 ```bash
 curl http://localhost:4000/api/health
 ```
 
-Örnek cevap:
+Example response:
 
 ```json
 {
   "ok": true,
   "network": "testnet",
-  "escrowContractId": "CBVY4GD3R6PRGG4WAFH5Y5WL3LJL2EI6VWYUYHSHNN6EOTQPPT7VQXIH"
+  "escrowContractId": "CBVY4GD3R6PRGG4WAFH5Y5WL3LJL2EI6VWYUYHSHNN6EOTQPPT7VQXIH",
+  "nativeTokenContractId": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
 }
 ```
 
-## Kullanım Senaryosu
+## API Endpoints
 
-1. Uygulamayı aç.
-2. `Ebeveyn` rolünü seç.
-3. Freighter cüzdanını bağla.
-4. Gerekirse `Testnet XLM al` butonuyla cüzdanı fonla.
-5. Çocuğun adını ve Stellar public wallet adresini ekle.
-6. Çocuğu seç, görev ve ödül miktarı gir.
-7. `Görev ver` butonuna bas.
-8. Freighter imzasını onayla; ödül kontratta kilitlenir.
-9. `Çocuk` rolüne geç.
-10. Çocuk kendini seçer ve görevi tamamladığını bildirir.
-11. Ebeveyn paneline dön.
-12. Görevi onayla ve Freighter imzasını ver.
-13. Kontrat ödülü çocuğun cüzdanına gönderir.
-
-## API Endpointleri
-
-| Method | Endpoint | Açıklama |
+| Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/health` | Backend ve ağ bilgilerini döndürür. |
-| `GET` | `/api/dashboard` | Ebeveyn, çocuk, görev ve ödeme verilerini döndürür. |
-| `POST` | `/api/children` | Yeni çocuk cüzdanı ekler. |
-| `POST` | `/api/friendbot` | Testnet cüzdanını Friendbot ile fonlar. |
-| `POST` | `/api/tasks/escrow-xdr` | Görev oluşturma ve ödül kilitleme transaction XDR hazırlar. |
-| `POST` | `/api/tasks/submit-escrow` | İmzalı görev oluşturma transactionını Soroban RPC'ye gönderir. |
-| `POST` | `/api/tasks/:id/submit` | Çocuğun görevi tamamladığını kaydeder. |
-| `POST` | `/api/tasks/:id/payment-xdr` | Kontrattan ödeme onayı için transaction XDR hazırlar. |
-| `POST` | `/api/tasks/:id/submit-payment` | İmzalı ödeme transactionını Soroban RPC'ye gönderir. |
-| `GET` | `/api/account/:address` | Stellar hesabının XLM bakiyesini döndürür. |
+| `GET` | `/api/health` | Returns backend and network status. |
+| `GET` | `/api/dashboard` | Returns parent, child, task, and payment data. |
+| `POST` | `/api/children` | Adds a child wallet by Stellar public key. |
+| `POST` | `/api/friendbot` | Funds a Testnet wallet through Friendbot. |
+| `POST` | `/api/tasks/escrow-xdr` | Prepares the contract transaction for creating and funding a task. |
+| `POST` | `/api/tasks/submit-escrow` | Submits the signed task escrow transaction. |
+| `POST` | `/api/tasks/:id/submit` | Marks a child task as completed. |
+| `POST` | `/api/tasks/:id/payment-xdr` | Prepares the contract approval/payment transaction. |
+| `POST` | `/api/tasks/:id/submit-payment` | Submits the signed contract payment transaction. |
+| `GET` | `/api/account/:address` | Returns Stellar account balance information. |
 
-## Akıllı Kontrat Build
+## Smart Contract Build
 
-Yeni Soroban/Rust sürümlerinde kontrat build hedefi olarak `wasm32v1-none` kullanılır.
+The contract is under `contracts/reward_escrow`.
+
+For recent Rust and Soroban versions, use `wasm32v1-none`:
 
 ```bash
 rustup target add wasm32v1-none
@@ -246,48 +271,49 @@ cd contracts/reward_escrow
 cargo build --target wasm32v1-none --release
 ```
 
-Windows üzerinde Türkçe karakterli path sorunları yaşanabildiği için deploy build'i geliştirme sırasında geçici olarak şu dizinde üretilmiştir:
+During development on Windows, the contract was also built from an ASCII-only path to avoid path encoding issues:
 
 ```text
 C:\stellar-build\reward_escrow
 ```
 
-## Neden Blockchain?
+## Demo Checklist
 
-Bu projede blockchain sadece ödeme yapmak için değil, ödeme koşulunu güvenceye almak için kullanılır.
+1. Open the app.
+2. Select the parent role.
+3. Connect Freighter on Stellar Testnet.
+4. Fund the parent wallet with Testnet XLM if needed.
+5. Add a child name and Stellar public wallet address.
+6. Create a task with a reward amount.
+7. Approve the Freighter signature to lock the reward in the contract.
+8. Switch to the child role.
+9. Mark the task as completed.
+10. Switch back to the parent panel.
+11. Approve the task and sign the payment transaction.
+12. Show the transaction on Stellar Expert Testnet.
 
-- Ödül görev oluşturulurken kontratta kilitlenir.
-- Ödeme kuralı kontrat kodunda bellidir.
-- Ebeveyn onayı olmadan ödeme çıkmaz.
-- Onay sonrası ödeme doğrudan çocuğun cüzdanına gider.
-- İşlem geçmişi Stellar Testnet üzerinde doğrulanabilir.
+## Security Notes
 
-Bu yapı, klasik "sonradan manuel para gönderme" yaklaşımından daha güvenilir ve şeffaftır.
+- The app never receives or stores the parent private key.
+- All signing is handled by Freighter.
+- Child accounts do not need to connect a wallet; only public wallet addresses are stored.
+- Rewards are locked in the smart contract before completion.
+- The project runs on Stellar Testnet and does not use real funds.
+- The backend uses in-memory data for hackathon/demo purposes.
+- A production version should add persistent storage, authentication, and role-based authorization.
 
-## Güvenlik Notları
+## Future Improvements
 
-- Uygulama ebeveynin private key bilgisini hiçbir zaman almaz.
-- İmzalama işlemi Freighter içinde yapılır.
-- Çocuk için cüzdan bağlantısı istenmez; sadece public wallet adresi kaydedilir.
-- Bu proje Testnet üzerinde çalışır, gerçek para içermez.
-- Backend şu an hackathon demosu için in-memory veri kullanır; production ortamında kalıcı veritabanı eklenmelidir.
+- Persistent database integration
+- Parent account based family records
+- Task categories and recurring tasks
+- Notification system
+- Child profile customization
+- Payment history page
+- Smart contract event tracking in the frontend
+- Production-ready deployment and monitoring
 
-## Demo İçin Kontrol Listesi
+## Summary
 
-- Freighter kurulu ve Testnet ağı seçili olmalı.
-- Ebeveyn cüzdanında Testnet XLM olmalı.
-- Çocuk cüzdanı geçerli bir Stellar public key olmalı.
-- Görev oluştururken Freighter imzası onaylanmalı.
-- Ödeme onayında ikinci Freighter imzası onaylanmalı.
-- İşlem hashleri Stellar Expert Testnet üzerinde kontrol edilebilir.
+KidQuest Wallet brings family tasks and allowance rewards to Stellar. Parents can lock rewards in a Soroban smart contract, children can submit completed tasks, and the contract releases the reward only after parent approval. This makes the allowance flow more transparent, verifiable, and engaging.
 
-## Faydalı Linkler
-
-- Stellar Developers: https://developers.stellar.org
-- Soroban Docs: https://developers.stellar.org/docs/build/smart-contracts
-- Stellar Expert Testnet: https://stellar.expert/explorer/testnet
-- Freighter Wallet: https://www.freighter.app
-- Friendbot: https://friendbot.stellar.org
-
-#   s t e l l a r h a c k h a t h o n  
- 

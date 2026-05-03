@@ -58,9 +58,9 @@ const emptyDashboard: Dashboard = {
 };
 
 const statusLabels: Record<TaskStatus, string> = {
-  assigned: "Cocuga atandi",
+  assigned: "Çocuğa atandı",
   submitted: "Onay bekliyor",
-  paid: "Odendi",
+  paid: "Ödendi",
 };
 
 export default function App() {
@@ -142,13 +142,13 @@ export default function App() {
     const childId = selectedChildId || dashboard.children[0]?.id;
 
     if (!childId) {
-      setError("Once cocuk cüzdani ac, sonra gorev verebilirsin.");
+      setError("Önce çocuk cüzdanı ekle, sonra görev verebilirsin.");
       return;
     }
 
     const sourceAddress = wallet.address;
     if (!sourceAddress) {
-      setError("Akilli kontratta odulu kilitlemek icin once ebeveyn cuzdani baglanmali.");
+      setError("Akıllı kontratta ödülü kilitlemek için önce ebeveyn cüzdanı bağlanmalı.");
       return;
     }
 
@@ -172,7 +172,7 @@ export default function App() {
       });
 
       if (error || !signedTxXdr) {
-        throw new Error(error || "Kontrat gorev imzasi alinamadi.");
+        throw new Error(error || "Kontrat görev imzası alınamadı.");
       }
 
       await api("/api/tasks/submit-escrow", {
@@ -271,19 +271,33 @@ export default function App() {
   return (
     <div className={styles.root}>
       <header className={styles.header}>
-        <div>
-          <p className={styles.kicker}>Stellar Testnet aile harcligi</p>
-          <h1>KidQuest Wallet</h1>
+        <div className={styles.brand}>
+          <div className={styles.logoMark}>★</div>
+          <div>
+            <h1><span>KidQuest</span> Wallet</h1>
+            <p>Görev bazlı aile harçlığı</p>
+          </div>
         </div>
         <div className={styles.headerActions}>
-          {role !== "landing" && (
-            <button className={styles.iconButton} onClick={() => setRole("landing")} type="button">
-              Rol degistir
+          <div className={styles.roleSwitch}>
+            <button
+              className={role === "parent" ? styles.activeRole : ""}
+              onClick={() => setRole("parent")}
+              type="button"
+            >
+              Ebeveyn
             </button>
-          )}
+            <button
+              className={role === "child" ? styles.activeRole : ""}
+              onClick={() => setRole("child")}
+              type="button"
+            >
+              Çocuk
+            </button>
+          </div>
           <div className={styles.networkPill}>
             <span className={styles.pulse} />
-            Testnet
+            Stellar Testnet
           </div>
           {role === "parent" && (
             <button
@@ -293,10 +307,10 @@ export default function App() {
               type="button"
             >
               {wallet.status === "connecting"
-                ? "Freighter aciliyor"
+                ? "Freighter açılıyor"
                 : wallet.address
                   ? shortAddress(wallet.address)
-                  : "Freighter bagla"}
+                  : "Freighter bağla"}
             </button>
           )}
         </div>
@@ -371,21 +385,21 @@ function RoleLanding({
   return (
     <section className={styles.roleLanding}>
       <div className={styles.roleIntro}>
-        <p className={styles.kicker}>Aile harcligi ve gorev odulu</p>
-        <h2>Bugun uygulamayi kim kullaniyor?</h2>
+        <p className={styles.kicker}>Aile harçlığı ve görev ödülü</p>
+        <h2>Bugün uygulamayı kim kullanıyor?</h2>
       </div>
       <div className={styles.roleGrid}>
         <button className={styles.roleCard} onClick={() => onSelectRole("parent")} type="button">
           <div className={`${styles.rolePhoto} ${styles.parentPhoto}`} />
           <span>Ebeveyn</span>
-          <strong>Aile paneli</strong>
-          <small>{childCount} cocuk cuzdani</small>
+          <strong>Aile Paneli</strong>
+          <small>{childCount} çocuk cüzdanı</small>
         </button>
         <button className={styles.roleCard} onClick={() => onSelectRole("child")} type="button">
           <div className={`${styles.rolePhoto} ${styles.childPhoto}`} />
-          <span>Cocuk</span>
-          <strong>Gorevlerim</strong>
-          <small>{taskCount} acik gorev</small>
+          <span>Çocuk</span>
+          <strong>Görevlerim</strong>
+          <small>{taskCount} açık görev</small>
         </button>
       </div>
     </section>
@@ -443,10 +457,33 @@ function ParentView({
 
   return (
     <>
+      <section className={styles.heroPanel}>
+        <div>
+          <p className={styles.heroEyebrow}>Hoş geldiniz!</p>
+          <h2>Çocukların görevlerini takip et, <span>ödüllerini güvenle gönder.</span></h2>
+          <p>Stellar blokzinciri ile hızlı, güvenli ve şeffaf harçlık yönetimi.</p>
+          <button
+            className={styles.heroButton}
+            type="button"
+            onClick={() => document.querySelector("form")?.scrollIntoView({ behavior: "smooth", block: "center" })}
+          >
+            Ödül Gönder
+          </button>
+        </div>
+        <div className={styles.heroIllustration} aria-hidden="true">
+          <span className={styles.heroStarOne}>★</span>
+          <span className={styles.heroStarTwo}>★</span>
+          <div className={styles.parentShape} />
+          <div className={styles.childShape} />
+          <div className={styles.tabletShape} />
+          <div className={styles.plantShape} />
+        </div>
+      </section>
+
       <section className={styles.summaryGrid}>
-        <Metric label="Cocuk cuzdani" value={dashboard.children.length.toString()} />
+        <Metric label="Çocuk cüzdanı" value={dashboard.children.length.toString()} />
         <Metric label="Onay bekleyen" value={dashboard.tasks.filter((task) => task.status === "submitted").length.toString()} />
-        <Metric label="Odenen odul" value={`${dashboard.payments.reduce((sum, item) => sum + Number(item.amount), 0).toFixed(2)} XLM`} />
+        <Metric label="Ödenen ödül" value={`${dashboard.payments.reduce((sum, item) => sum + Number(item.amount), 0).toFixed(2)} XLM`} />
         <Metric label="Ebeveyn cüzdanı" value={wallet.address ? "Bağlı" : "Yok"} />
       </section>
 
@@ -488,7 +525,7 @@ function ParentView({
           <div className={styles.panelHeader}>
             <div>
               <p className={styles.kicker}>Ebeveyn paneli</p>
-              <h2>Cocuklar ve cuzdanlar</h2>
+              <h2>Çocuklar ve cüzdanlar</h2>
             </div>
             <button className={styles.iconButton} onClick={loadDashboard} disabled={loading || Boolean(busyAction)}>
               Yenile
@@ -497,18 +534,18 @@ function ParentView({
 
           <form className={styles.childAddForm} onSubmit={createChild}>
             <label>
-              Cocuk adi
-              <input value={childName} onChange={(event) => setChildName(event.target.value)} placeholder="Cocuk adi" />
+              Çocuk adı
+              <input value={childName} onChange={(event) => setChildName(event.target.value)} placeholder="Çocuk adı" />
             </label>
             <label className={styles.wideField}>
-              Cocuk Stellar wallet adresi
+              Çocuk Stellar wallet adresi
               <input
                 value={childWalletAddress}
                 onChange={(event) => setChildWalletAddress(event.target.value)}
                 placeholder="G..."
               />
             </label>
-            <button disabled={busyAction === "child"}>{busyAction === "child" ? "Ekleniyor" : "Cuzdan ekle"}</button>
+            <button disabled={busyAction === "child"}>{busyAction === "child" ? "Ekleniyor" : "Cüzdan ekle"}</button>
           </form>
 
           <ChildWalletPicker
@@ -519,9 +556,9 @@ function ParentView({
 
           <form className={styles.taskForm} onSubmit={createTask}>
             <label className={styles.childSelectField}>
-              Gorev verilecek cocuk
+              Görev verilecek çocuk
               <select value={selectedChildId} onChange={(event) => setSelectedChildId(event.target.value)}>
-                {dashboard.children.length === 0 && <option value="">Once cocuk ekle</option>}
+                {dashboard.children.length === 0 && <option value="">Önce çocuk ekle</option>}
                 {dashboard.children.map((child) => (
                   <option key={child.id} value={child.id}>
                     {child.name}
@@ -530,24 +567,23 @@ function ParentView({
               </select>
             </label>
             <label className={styles.wideField}>
-              Gorev
-              <input value={taskTitle} onChange={(event) => setTaskTitle(event.target.value)} placeholder="Orn. odani topla" />
+              Görev
+              <input value={taskTitle} onChange={(event) => setTaskTitle(event.target.value)} placeholder="Örn. odanı topla" />
             </label>
             <label>
-              Odul
+              Ödül
               <input min="0.1" step="0.1" type="number" value={rewardXlm} onChange={(event) => setRewardXlm(event.target.value)} />
             </label>
             <label>
               Son tarih
               <input
-                inputMode="numeric"
-                placeholder="02.05.2026"
+                type="date"
                 value={dueDate}
                 onChange={(event) => setDueDate(event.target.value)}
               />
             </label>
             <button className={styles.primaryTaskButton} type="submit">
-              {busyAction === "task" ? "Ekleniyor" : "Gorev ver"}
+              {busyAction === "task" ? "Ekleniyor" : "Görev ver"}
             </button>
           </form>
         </section>
@@ -555,8 +591,8 @@ function ParentView({
         <section className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
-              <p className={styles.kicker}>Secili cocuk</p>
-              <h2>{selectedChild ? `${selectedChild.name} gorevleri` : "Cocuk sec"}</h2>
+              <p className={styles.kicker}>Seçili çocuk</p>
+              <h2>{selectedChild ? `${selectedChild.name} görevleri` : "Çocuk seç"}</h2>
             </div>
             {selectedChild && <span className={styles.balance}>{Number(selectedChild.balance).toFixed(2)} XLM</span>}
           </div>
@@ -564,7 +600,7 @@ function ParentView({
           {selectedChild ? (
             <>
               <label className={styles.walletSelector}>
-                Cocuk cuzdan sec
+                Çocuk cüzdanı seç
                 <select value={selectedChildId} onChange={(event) => setSelectedChildId(event.target.value)}>
                   {dashboard.children.map((child) => (
                     <option key={child.id} value={child.id}>
@@ -574,21 +610,21 @@ function ParentView({
                 </select>
               </label>
               <div className={styles.walletBox}>
-                <span>{selectedChild.name} cuzdani</span>
+                <span>{selectedChild.name} cüzdanı</span>
                 <code>{shortAddress(selectedChild.walletAddress)}</code>
               </div>
               <button
                 className={styles.iconButton}
                 type="button"
-                onClick={() => fundTestnetWallet(selectedChild.walletAddress, "cocuk")}
-                disabled={busyAction === "fund-cocuk"}
+                onClick={() => fundTestnetWallet(selectedChild.walletAddress, "çocuk")}
+                disabled={busyAction === "fund-çocuk"}
               >
-                Cocuk cuzdanina Testnet XLM al
+                Çocuk cüzdanına Testnet XLM al
               </button>
               <TaskReviewList approveTask={approveTask} busyAction={busyAction} tasks={selectedTasks} />
             </>
           ) : (
-            <div className={styles.emptyState}>Cocuk ekleyince burada gorevlerini gorup onaylayabilirsin.</div>
+            <div className={styles.emptyState}>Çocuk ekleyince burada görevlerini görüp onaylayabilirsin.</div>
           )}
         </section>
       </div>
@@ -622,16 +658,16 @@ function ChildView({
       <div className={styles.panel}>
         <div className={styles.panelHeader}>
           <div>
-            <p className={styles.kicker}>Cocuk modu</p>
-            <h2>Gorevlerim</h2>
+            <p className={styles.kicker}>Çocuk modu</p>
+            <h2>Görevlerim</h2>
           </div>
           {selectedChild && <span className={styles.balance}>{Number(selectedChild.balance).toFixed(2)} XLM</span>}
         </div>
 
         <label className={styles.walletSelector}>
-          Hangi cocuksun?
+          Hangi çocuksun?
           <select value={selectedChildId} onChange={(event) => setSelectedChildId(event.target.value)}>
-            {dashboard.children.length === 0 && <option value="">Henuz cocuk yok</option>}
+            {dashboard.children.length === 0 && <option value="">Henüz çocuk yok</option>}
             {dashboard.children.map((child) => (
               <option key={child.id} value={child.id}>
                 {child.name}
@@ -643,7 +679,7 @@ function ChildView({
         {selectedChild ? (
           <>
             <div className={styles.walletBox}>
-              <span>{selectedChild.name} cuzdani</span>
+              <span>{selectedChild.name} cüzdanı</span>
               <code>{shortAddress(selectedChild.walletAddress)}</code>
             </div>
             <ChildTaskList
@@ -655,7 +691,7 @@ function ChildView({
             />
           </>
         ) : (
-          <div className={styles.emptyState}>Ebeveynin once cocuk cuzdani eklemeli.</div>
+          <div className={styles.emptyState}>Ebeveynin önce çocuk cüzdanı eklemeli.</div>
         )}
       </div>
     </section>
@@ -674,11 +710,11 @@ function ChildWalletPicker({
   return (
     <div className={styles.childWalletList}>
       <div className={styles.sectionTitle}>
-        <span>Cocuk cuzdanlari</span>
+        <span>Çocuk cüzdanları</span>
         <strong>{childrenList.length}</strong>
       </div>
       {childrenList.length === 0 ? (
-        <div className={styles.emptyState}>Once aileye bir cocuk cuzdani ekle.</div>
+        <div className={styles.emptyState}>Önce aileye bir çocuk cüzdanı ekle.</div>
       ) : (
         <div className={styles.childWalletGrid}>
           {childrenList.map((child) => (
@@ -711,7 +747,7 @@ function TaskReviewList({
   tasks: Task[];
 }) {
   if (tasks.length === 0) {
-    return <div className={styles.emptyState}>Bu cocuk icin henuz gorev yok.</div>;
+    return <div className={styles.emptyState}>Bu çocuk için henüz görev yok.</div>;
   }
 
   return (
@@ -726,7 +762,7 @@ function TaskReviewList({
             {task.proof && <p className={styles.proof}>{task.proof}</p>}
             {task.txHash && (
               <a className={styles.txLink} href={stellarExpertUrl(task.txHash)} target="_blank" rel="noreferrer">
-                Islemi Stellar Expert'te ac
+                İşlemi Stellar Expert'te aç
               </a>
             )}
           </div>
@@ -734,7 +770,7 @@ function TaskReviewList({
             <span className={`${styles.status} ${styles[task.status]}`}>{statusLabels[task.status]}</span>
             {task.status === "submitted" && (
               <button onClick={() => approveTask(task.id)} disabled={busyAction === `approve-${task.id}`}>
-                {busyAction === `approve-${task.id}` ? "Odeniyor" : "Harclik gonder"}
+                {busyAction === `approve-${task.id}` ? "Ödeniyor" : "Harçlık gönder"}
               </button>
             )}
           </div>
@@ -758,7 +794,7 @@ function ChildTaskList({
   tasks: Task[];
 }) {
   if (tasks.length === 0) {
-    return <div className={styles.emptyState}>Henuz sana verilmis gorev yok.</div>;
+    return <div className={styles.emptyState}>Henüz sana verilmiş görev yok.</div>;
   }
 
   return (
@@ -774,10 +810,10 @@ function ChildTaskList({
               <input
                 value={proofByTask[task.id] ?? ""}
                 onChange={(event) => setProofByTask((current) => ({ ...current, [task.id]: event.target.value }))}
-                placeholder="Kanit notu: kitabi bitirdim, masami topladim..."
+                placeholder="Kanıt notu: kitabı bitirdim, masamı topladım..."
               />
               <button onClick={() => submitTask(task.id)} disabled={busyAction === `submit-${task.id}`}>
-                Tamamladim
+                Tamamladım
               </button>
             </div>
           ) : (
@@ -791,10 +827,20 @@ function ChildTaskList({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className={styles.metric}>
-      <span>{label}</span>
-      <strong>{value}</strong>
+      <div className={styles.metricIcon}>{metricIcon(label)}</div>
+      <div>
+        <span>{label}</span>
+        <strong>{value}</strong>
+      </div>
     </div>
   );
+}
+
+function metricIcon(label: string) {
+  if (label.toLowerCase().includes("çocuk")) return "☺";
+  if (label.toLowerCase().includes("onay")) return "⌛";
+  if (label.toLowerCase().includes("öd")) return "★";
+  return "◼";
 }
 
 async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -805,14 +851,14 @@ async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error ?? "Istek basarisiz");
+    throw new Error(data.error ?? "İstek başarısız");
   }
 
   return data;
 }
 
 function messageFromError(err: unknown) {
-  return err instanceof Error ? err.message : "Beklenmeyen hata olustu";
+  return err instanceof Error ? err.message : "Beklenmeyen hata oluştu";
 }
 
 function formatDate(value: string) {
