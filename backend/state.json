@@ -1,0 +1,44 @@
+{
+  "parent": {
+    "name": "Demo Ebeveyn",
+    "walletAddress": "GAY4RUHKZBGT7Q47VT6JCJ4UVY2KT6WKWFRHVVMKOT7YSUYXP5GDF7O3"
+  },
+  "children": [
+    {
+      "id": "229b88e8-6844-47d1-93f8-892ce862c57b",
+      "name": "Fatma",
+      "walletAddress": "GD7HTD3GXR5EEKSJQWKLG43EWCXTUZEPLLLJM53LXL6FJSFDJYDIBJCI",
+      "createdAt": "2026-05-03T15:54:39.850Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "e75ef9b8-6837-4a19-acc2-129a0dc346a6",
+      "childId": "229b88e8-6844-47d1-93f8-892ce862c57b",
+      "childName": "Fatma",
+      "title": "20 dakika kitap oku",
+      "rewardXlm": "5.00",
+      "dueDate": "",
+      "status": "paid",
+      "proof": "Çocuk görevi tamamladığını bildirdi.",
+      "txHash": "851c8c65d03eee6b1950692adf12e2c2a9690cabb2bbcbacb60c45ea56bae79d",
+      "escrowTxHash": "52ab55161d7f9831be65bb39ef4437163a666de68a3e9d0a3249b5fcf4ead837",
+      "onchainTaskId": "14",
+      "createdAt": "2026-05-03T15:54:50.431Z",
+      "submittedAt": "2026-05-03T15:54:54.694Z",
+      "approvedAt": "2026-05-03T15:55:05.884Z"
+    }
+  ],
+  "pendingTasks": [],
+  "payments": [
+    {
+      "id": "707ea979-e8d1-47c6-90f0-3a52fd33f598",
+      "taskId": "e75ef9b8-6837-4a19-acc2-129a0dc346a6",
+      "childId": "229b88e8-6844-47d1-93f8-892ce862c57b",
+      "childName": "Fatma",
+      "amount": "5.00",
+      "txHash": "851c8c65d03eee6b1950692adf12e2c2a9690cabb2bbcbacb60c45ea56bae79d",
+      "createdAt": "2026-05-03T15:55:05.884Z"
+    }
+  ]
+}

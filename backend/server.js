@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import {
   Address,
@@ -25,7 +28,10 @@ const horizon = new Horizon.Server(HORIZON_URL);
 const soroban = new rpc.Server(RPC_URL);
 const escrowContract = new Contract(ESCROW_CONTRACT_ID);
 
-const state = {
+const BACKEND_DIR = path.dirname(fileURLToPath(import.meta.url));
+const STATE_FILE = path.join(BACKEND_DIR, "state.json");
+
+const defaultState = {
   parent: {
     name: "Demo Ebeveyn",
     walletAddress: null,
@@ -35,6 +41,31 @@ const state = {
   pendingTasks: [],
   payments: [],
 };
+
+let state = defaultState;
+
+async function saveState() {
+  try {
+    await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2), "utf8");
+  } catch (err) {
+    console.error("State save error:", err);
+  }
+}
+
+async function loadState() {
+  try {
+    const file = await fs.readFile(STATE_FILE, "utf8");
+    state = JSON.parse(file);
+  } catch (err) {
+    if (err && err.code === "ENOENT") {
+      await saveState();
+    } else {
+      console.error("State load error, using default state:", err);
+    }
+  }
+}
+
+await loadState();
 
 app.use(cors({ origin: ["http://localhost:3000", "http://127.0.0.1:3000"] }));
 app.use(express.json());
@@ -94,6 +125,7 @@ app.post("/api/children", async (req, res) => {
   };
 
   state.children.push(child);
+  await saveState();
 
   res.status(201).json({
     child: { ...safeChild(child), balance: await getNativeBalance(walletAddress) },
@@ -188,6 +220,7 @@ app.post("/api/tasks/escrow-xdr", async (req, res) => {
       createdAt: new Date().toISOString(),
     });
     state.parent.walletAddress = sourceAddress;
+    await saveState();
 
     res.json({
       draftId,
@@ -238,6 +271,7 @@ app.post("/api/tasks/submit-escrow", async (req, res) => {
 
     state.pendingTasks = state.pendingTasks.filter((item) => item.id !== draftId);
     state.tasks.unshift(task);
+    await saveState();
 
     res.status(201).json({ task, txHash, onchainTaskId });
   } catch (err) {
@@ -246,7 +280,7 @@ app.post("/api/tasks/submit-escrow", async (req, res) => {
   }
 });
 
-app.post("/api/tasks/:id/submit", (req, res) => {
+app.post("/api/tasks/:id/submit", async (req, res) => {
   const task = state.tasks.find((item) => item.id === req.params.id);
   const proof = sanitizeText(req.body.proof);
 
@@ -261,6 +295,7 @@ app.post("/api/tasks/:id/submit", (req, res) => {
   task.status = "submitted";
   task.proof = proof || "Çocuk görevi tamamladığını bildirdi.";
   task.submittedAt = new Date().toISOString();
+  await saveState();
 
   res.json({ task });
 });
@@ -307,6 +342,7 @@ app.post("/api/tasks/:id/payment-xdr", async (req, res) => {
     const prepared = await soroban.prepareTransaction(tx);
 
     state.parent.walletAddress = sourceAddress;
+    await saveState();
 
     res.json({
       xdr: prepared.toXDR(),
@@ -363,6 +399,7 @@ app.post("/api/tasks/:id/submit-payment", async (req, res) => {
     };
 
     state.payments.unshift(payment);
+    await saveState();
 
     res.json({
       task,
