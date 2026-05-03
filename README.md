@@ -82,6 +82,112 @@ Parent approves the task
 Smart contract sends reward to child wallet
 ```
 
+## Demo Walkthrough
+
+This walkthrough shows the full Ecem reward flow captured from the running app. The parent connects Freighter, registers Ecem's public Stellar address, assigns a task, locks the reward, approves the completed task, and confirms that the XLM reward reaches the child wallet.
+
+### 1. Start From Role Selection
+
+The app opens with a clean parent/child role selector. Parents manage wallets and rewards, while children only see their own tasks.
+
+![Landing role selection](docs/screenshots/01-landing-role-selection.png)
+
+### 2. Connect The Parent Wallet
+
+The parent wallet is the only wallet connected to the app. Freighter handles signing, so the private key never touches the frontend or backend.
+
+![Connect parent wallet](docs/screenshots/02-connect-parent-wallet.png)
+
+After connection, the dashboard shows the parent wallet as connected on Stellar Testnet.
+
+![Parent wallet connected](docs/screenshots/03-parent-wallet-connected.png)
+
+### 3. Copy The Child Wallet Address
+
+The child account is added by public Stellar address. In this demo, Ecem's wallet address is opened and copied from Freighter.
+
+![Copy child wallet address](docs/screenshots/04-copy-child-address.png)
+
+![Copy address button](docs/screenshots/05-copy-address-button.png)
+
+### 4. Add Ecem As A Child Wallet
+
+The parent enters Ecem's name and Stellar public key, then clicks **Add Wallet**. This stores the child wallet under the parent dashboard.
+
+![Enter child wallet](docs/screenshots/06-enter-child-wallet.png)
+
+![Add child wallet](docs/screenshots/07-add-child-wallet.png)
+
+Ecem then appears in the child wallet list and can be selected for task assignment.
+
+![Add Ecem wallet step](docs/screenshots/08-add-ecem-wallet.png)
+
+![Ecem wallet added](docs/screenshots/09-ecem-wallet-added.png)
+
+![Select Ecem wallet](docs/screenshots/10-select-ecem-wallet.png)
+
+### 5. Create And Lock A Task Reward
+
+The parent selects Ecem, writes the task, sets the reward to `10 XLM`, and chooses a due date.
+
+![Create task for Ecem](docs/screenshots/11-create-task-for-ecem.png)
+
+Freighter asks the parent to confirm the contract transaction. This step locks the task reward through the Soroban escrow contract.
+
+![Parent signs task escrow](docs/screenshots/12-parent-sign-task-escrow.png)
+
+After signing, the task appears as assigned to Ecem.
+
+![Task assigned to Ecem](docs/screenshots/13-task-assigned-to-ecem.png)
+
+### 6. Child Completes The Task
+
+In child mode, Ecem can see the assigned task and mark it as completed.
+
+![Child task view](docs/screenshots/14-child-task-view.png)
+
+![Child completes task](docs/screenshots/15-child-completes-task.png)
+
+The parent dashboard then shows that the task is waiting for approval.
+
+![Parent sees pending approval](docs/screenshots/16-parent-sees-pending-approval.png)
+
+### 7. Parent Approves And Sends The Reward
+
+The parent approves the completed task. Freighter opens another transaction confirmation for the contract payment.
+
+![Parent approves reward](docs/screenshots/17-parent-approves-reward.png)
+
+Once the transaction is confirmed, the task status changes to paid.
+
+![Reward paid parent view](docs/screenshots/18-reward-paid-parent-view.png)
+
+The child view also shows the task as paid.
+
+![Child paid status](docs/screenshots/19-child-paid-status.png)
+
+### 8. Verify Balances And History
+
+Ecem's Freighter balance increases by `+10 XLM`.
+
+![Child balance increased](docs/screenshots/20-child-balance-increased.png)
+
+The parent balance decreases by the same reward amount after the contract payment is approved.
+
+![Parent balance decreased](docs/screenshots/21-parent-balance-decreased.png)
+
+The parent wallet history shows the contract interaction and the `-10 XLM` reward payment.
+
+![Parent Freighter history](docs/screenshots/22-parent-freighter-history.png)
+
+The parent dashboard provides an overview of the family wallet state.
+
+![Parent dashboard overview](docs/screenshots/23-parent-dashboard-overview.png)
+
+The final dashboard shows two child wallets, the completed Ecem task, and the updated reward totals.
+
+![Final dashboard state](docs/screenshots/24-final-dashboard-state.png)
+
 ## Smart Contract
 
 The smart contract is located in:
@@ -316,4 +422,3 @@ C:\stellar-build\reward_escrow
 ## Summary
 
 KidQuest Wallet brings family tasks and allowance rewards to Stellar. Parents can lock rewards in a Soroban smart contract, children can submit completed tasks, and the contract releases the reward only after parent approval. This makes the allowance flow more transparent, verifiable, and engaging.
-
